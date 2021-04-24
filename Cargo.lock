@@ -2404,6 +2404,7 @@ dependencies = [
  "actix-web",
  "chrono",
  "config",
+ "log",
  "reqwest",
  "serde 1.0.125",
  "sqlx",
