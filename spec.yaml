@@ -1,26 +1,27 @@
-#! spec.yaml
-name: zero2prod
-# Check https://www.digitalocean.com/docs/app-platform/#regional-availability
-# for a list of all the available options.
-# You can get region slugs from
-# https://www.digitalocean.com/docs/platform/availability-matrix/
-# They must specified lowercased.
-# `fra` stands for Frankfurt (Germany - EU)
-region: fra
+databases:
+- engine: PG
+  name: db
+  num_nodes: 1
+  size: db-s-dev-database
+  version: "12"
+name: zero-2-prod
+region: ams
 services:
-  - name: zero2prod
-    dockerfile_path: Dockerfile
-    source_dir: .
-    github:
-      branch: main
-      deploy_on_push: true
-      repo: amuhle/zero2prod
-    health_check:
-      http_path: /health_check
-    # The port the application will be listening on for incoming requests
-    # It should match what we specified in our configuration/production.yaml file!
-    http_port: 8000
-    instance_count: 1
-    instance_size_slug: basic-xxs
-    routes:
-      - path: /
+- dockerfile_path: Dockerfile
+  envs:
+  - key: DATABASE_URL
+    scope: RUN_TIME
+    value: ${db.DATABASE_URL}
+  github:
+    branch: main
+    deploy_on_push: true
+    repo: amuhle/zero2prod
+  health_check:
+    http_path: /health_check
+  http_port: 8000
+  instance_count: 1
+  instance_size_slug: basic-xxs
+  name: zero-2-prod
+  routes:
+  - path: /
+  source_dir: /
