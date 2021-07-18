@@ -1,3 +1,4 @@
+use std::convert::TryInto;
 use actix_web::{web, HttpResponse};
 use chrono::Utc;
 use sqlx::PgPool;
@@ -25,15 +26,9 @@ pub async fn subscribe(
     form: web::Form<FormData>,
     pool: web::Data<PgPool>,
 ) -> Result<HttpResponse, HttpResponse> {
-    let name = SubscriberName::parse(form.0.name)
-            .map_err(|_| HttpResponse::BadRequest().finish())?;
-    let email = SubscriberEmail::parse(form.0.email)
-            .map_err(|_| HttpResponse::BadRequest().finish())?;
 
-    let new_subscriber  = NewSubscriber {
-        email: email, 
-        name: name
-    };
+    let new_subscriber = form.0.try_into()
+        .map_err(|_| HttpResponse::BadRequest().finish())?; 
 
     insert_subscriber(&pool, &new_subscriber)
         .await
@@ -41,7 +36,6 @@ pub async fn subscribe(
 
     Ok(HttpResponse::Ok().finish())
 }
-
 
 #[tracing::instrument(name = "Saving new subscriber details in the DB", skip(new_subscriber, pool))]
 pub async fn insert_subscriber(pool: &PgPool, new_subscriber: &NewSubscriber) -> Result<(), sqlx::Error> {
@@ -61,4 +55,14 @@ pub async fn insert_subscriber(pool: &PgPool, new_subscriber: &NewSubscriber) ->
     })?;
 
     Ok(())
+}
+
+impl TryInto<NewSubscriber> for FormData {
+   type Error = String;
+   
+   fn try_into(self) -> Result<NewSubscriber, String> {
+        let name = SubscriberName::parse(self.name)?;
+        let email = SubscriberEmail::parse(self.email)?;
+        Ok(NewSubscriber { email, name })
+   }
 }
