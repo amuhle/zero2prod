@@ -51,8 +51,6 @@ impl Application {
     }
 }
 
-
-
 pub fn run(
     listener: TcpListener,
     db_pool: PgPool,
