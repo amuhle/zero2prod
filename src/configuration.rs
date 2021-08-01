@@ -1,11 +1,13 @@
-use std::convert::{TryFrom, TryInto};
+use crate::domain::SubscriberEmail;
 use serde_aux::field_attributes::deserialize_number_from_string;
 use sqlx::postgres::{PgConnectOptions, PgSslMode};
+use std::convert::{TryFrom, TryInto};
 
 #[derive(serde::Deserialize)]
 pub struct Settings {
     pub database: DatabaseSettings,
     pub application: ApplicationSettings,
+    pub email_client: EmailClientSettings,
 }
 
 #[derive(serde::Deserialize)]
@@ -26,6 +28,19 @@ pub struct DatabaseSettings {
     pub require_ssl: bool,
 }
 
+#[derive(serde::Deserialize)]
+pub struct EmailClientSettings {
+    pub base_url: String,
+    pub sender_email: String,
+    pub authorization_token: String,
+}
+
+impl EmailClientSettings {
+    pub fn sender(&self) -> Result<SubscriberEmail, String> {
+        SubscriberEmail::parse(self.sender_email.clone())
+    }
+}
+
 pub fn get_configuration() -> Result<Settings, config::ConfigError> {
     let mut settings = config::Config::default();
     let base_path = std::env::current_dir().expect("Failed to determine the current directory");
@@ -35,7 +50,9 @@ pub fn get_configuration() -> Result<Settings, config::ConfigError> {
         .unwrap_or_else(|_| "local".into())
         .try_into()
         .expect("Failed to parse APP_ENVIRONMENT");
-    settings.merge(config::File::from(configuration_directory.join(environment.as_str())).required(true))?;
+    settings.merge(
+        config::File::from(configuration_directory.join(environment.as_str())).required(true),
+    )?;
 
     // Add in settings from environment variables (with a prefix of APP and '__' as separator)
     // E.g. `APP_APPLICATION__PORT=5001 would set `Settings.application.port`
@@ -65,7 +82,8 @@ impl TryFrom<String> for Environment {
             "local" => Ok(Self::Local),
             "production" => Ok(Self::Production),
             other => Err(format!(
-                "{} is not a supported environment. Use either `local` or `production`.", other
+                "{} is not a supported environment. Use either `local` or `production`.",
+                other
             )),
         }
     }
