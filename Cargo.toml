@@ -33,7 +33,7 @@ unicode-segmentation = "1.8.0"
 validator = "0.14.0"
 
 [dependencies.sqlx]
-version = "0.5.1"
+version = "0.5.7"
 default-feataures = false
 features = [
     "runtime-actix-rustls",

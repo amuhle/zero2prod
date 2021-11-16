@@ -1,5 +1,5 @@
 # Builder stage
-FROM rust:1.49 AS builder
+FROM rust:1.53 AS builder
 
 WORKDIR app
 COPY . .
