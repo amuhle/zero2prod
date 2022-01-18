@@ -1,3 +1,4 @@
+use secrecy::{Secret, ExposeSecret};
 use crate::domain::SubscriberEmail;
 use reqwest::Client;
 
@@ -5,11 +6,11 @@ pub struct EmailClient {
     http_client: Client,
     base_url: String,
     sender: SubscriberEmail,
-    authorization_token: String,
+    authorization_token: Secret<String>,
 }
 
 impl EmailClient {
-    pub fn new(base_url: String, sender: SubscriberEmail, authorization_token: String) -> Self {
+    pub fn new(base_url: String, sender: SubscriberEmail, authorization_token: Secret<String>) -> Self {
         let http_client = Client::builder()
             .timeout(std::time::Duration::from_secs(10))
             .build()
@@ -30,6 +31,7 @@ impl EmailClient {
         text_content: &str,
     ) -> Result<(), reqwest::Error> {
         let url = format!("{}/email", self.base_url);
+
         let request_body = SendEmailRequest {
             from: self.sender.as_ref(),
             to: recipient.as_ref(),
@@ -39,7 +41,9 @@ impl EmailClient {
         };
         self.http_client
             .post(&url)
-            .header("X-Postmark-Server-Token", &self.authorization_token)
+            .header(
+                "X-Postmark-Server-Token", 
+                self.authorization_token.expose_secret())
             .json(&request_body)
             .send()
             .await?
@@ -68,6 +72,7 @@ mod tests {
     use fake::{Fake, Faker};
     use wiremock::matchers::{any, header, header_exists, method, path};
     use wiremock::{Mock, MockServer, Request, ResponseTemplate};
+    use secrecy::Secret;
 
     struct SendEmailBodyMatcher;
     impl wiremock::Match for SendEmailBodyMatcher {
@@ -100,7 +105,7 @@ mod tests {
     }
 
     fn email_client(base_url: String) -> EmailClient {
-        EmailClient::new(base_url, email(), Faker.fake())
+        EmailClient::new(base_url, email(), Secret::new(Faker.fake()))
     }
 
     #[tokio::test]

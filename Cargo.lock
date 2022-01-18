@@ -1766,6 +1766,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "secrecy"
+version = "0.8.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "9bd1c54ea06cfd2f6b63219704de0b9b4f72dcc2b8fdef820be6cd799780e91e"
+dependencies = [
+ "serde 1.0.125",
+ "zeroize",
+]
+
+[[package]]
 name = "semver"
 version = "0.9.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2795,6 +2805,7 @@ dependencies = [
  "quickcheck",
  "quickcheck_macros",
  "reqwest",
+ "secrecy",
  "serde 1.0.125",
  "serde-aux",
  "serde_json",
@@ -2811,3 +2822,9 @@ dependencies = [
  "validator",
  "wiremock",
 ]
+
+[[package]]
+name = "zeroize"
+version = "1.5.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "cc222aec311c323c717f56060324f32b82da1ce1dd81d9a09aa6a9030bfe08db"
