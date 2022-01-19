@@ -30,7 +30,7 @@ pub async fn subscribe(
     let new_subscriber = form
         .0
         .try_into()
-        .map_err(|_| HttpResponse::BadRequest().finish())?;
+        .map_err(|_| HttpResponse::BadRequest().finish())?;  
 
     insert_subscriber(&pool, &new_subscriber)
         .await
@@ -52,7 +52,7 @@ pub async fn subscribe(
     name = "Saving new subscriber details in the DB",
     skip(new_subscriber, pool)
 )]
-pub async fn insert_subscriber(
+async fn insert_subscriber(
     pool: &PgPool,
     new_subscriber: &NewSubscriber,
 ) -> Result<(), sqlx::Error> {
