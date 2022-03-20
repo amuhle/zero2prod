@@ -1,3 +1,4 @@
+use once_cell::sync::Lazy;
 use sqlx::{Connection, Executor, PgConnection, PgPool};
 use uuid::Uuid;
 use wiremock::MockServer;
@@ -5,13 +6,12 @@ use zero2prod::configuration::{get_configuration, DatabaseSettings};
 use zero2prod::startup::{get_connection_pool, Application};
 use zero2prod::telemetry::{get_subscriber, init_subscriber};
 
-lazy_static::lazy_static! {
-    static ref TRACING: () = {
-        let filter = if std::env::var("TEST_LOG").is_ok() { "debug" } else { "" };
-        let subscriber = get_subscriber("test".into(), filter.into());
-        init_subscriber(subscriber);
-    };
-}
+static TRACING: Lazy<()> = Lazy::new(|| {
+    let filter = if std::env::var("TEST_LOG").is_ok() { "debug" } else { "" };
+    let subscriber = get_subscriber("test".into(), filter.into());
+    init_subscriber(subscriber);
+});
+
 pub struct TestApp {
     pub address: String,
     pub db_pool: PgPool,
@@ -31,7 +31,7 @@ impl TestApp {
 }
 
 pub async fn spawn_app() -> TestApp {
-    lazy_static::initialize(&TRACING);
+    Lazy::force(&TRACING);
 
     let email_server = MockServer::start().await;
 

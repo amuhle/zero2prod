@@ -2,7 +2,7 @@ use crate::helpers::spawn_app;
 use wiremock::matchers::{method, path};
 use wiremock::{Mock, ResponseTemplate};
 
-#[actix_rt::test]
+#[tokio::test]
 async fn subscribe_returns_a_200_for_valid_form_data() {
     // Arrange
     let app = spawn_app().await;
@@ -29,7 +29,7 @@ async fn subscribe_returns_a_200_for_valid_form_data() {
     assert_eq!(saved.name, "le guin");
 }
 
-#[actix_rt::test]
+#[tokio::test]
 async fn subscribe_return_a_400_when_fields_are_present_but_empty() {
     // Arrange
     let app = spawn_app().await;
@@ -53,7 +53,7 @@ async fn subscribe_return_a_400_when_fields_are_present_but_empty() {
     }
 }
 
-#[actix_rt::test]
+#[tokio::test]
 async fn subscribe_returns_a_400_when_data_is_missing() {
     //Arrange
     let app = spawn_app().await;
@@ -77,7 +77,7 @@ async fn subscribe_returns_a_400_when_data_is_missing() {
     }
 }
 
-#[actix_rt::test]
+#[tokio::test]
 async fn subscribe_sends_a_confirmation_email_for_valid_data() {
     //Arrange
     let app = spawn_app().await;

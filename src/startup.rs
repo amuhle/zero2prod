@@ -1,9 +1,9 @@
-use secrecy::Secret;
 use crate::configuration::{DatabaseSettings, Settings};
 use crate::email_client::EmailClient;
 use crate::routes;
 use actix_web::dev::Server;
 use actix_web::{web, App, HttpServer};
+use secrecy::Secret;
 use sqlx::postgres::PgPoolOptions;
 use sqlx::PgPool;
 use std::net::TcpListener;
@@ -65,7 +65,7 @@ pub fn run(
     let server = HttpServer::new(move || {
         // Wrap the connection in an Arc smart pointer
         App::new()
-            .wrap(TracingLogger)
+            .wrap(TracingLogger::default())
             .route("/health_check", web::get().to(routes::health_check))
             .route("/subscriptions", web::post().to(routes::subscribe))
             .app_data(db_pool.clone())
